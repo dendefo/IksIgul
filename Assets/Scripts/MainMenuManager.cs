@@ -5,14 +5,39 @@ using UnityEngine.SceneManagement;
 
 public class MainMenuManager : MonoBehaviour
 {
+    [SerializeField] RectTransform PlayerContent;
+    [SerializeField] PlayerSettings PlayerSettingsPrefab;
+
+    public void AddPlayer()
+    {
+        Instantiate(PlayerSettingsPrefab, PlayerContent);
+        RescaleContentHeight();
+    }
+    public void RemovePlayer()
+    {
+        if (PlayerContent.childCount > 2)
+            Destroy(PlayerContent.GetChild(PlayerContent.childCount - 1).gameObject);
+        RescaleContentHeight();
+    }
+    public void RescaleContentHeight()
+    {
+        var childAmount = PlayerContent.childCount;
+        var height = PlayerContent.GetChild(0).GetComponent<RectTransform>().rect.height;
+        PlayerContent.sizeDelta = new Vector2(PlayerContent.sizeDelta.x, height * childAmount);
+    }
     public void StartGame()
     {
-        new Player(name: "Player 1", Symbol:"X");
-        new Player(name: "Player 2", Symbol:"O");
-        new Player(name: "Player 3", Symbol:"L");
-        new Player(name: "Player 4", Symbol:"T");
-        new Player(name: "Player 5", Symbol:"P");
-        new Player(name: "Player 6", Symbol:"Z");
+        int playerCount = 0;
+        foreach (Transform child in PlayerContent)
+        {
+            var player = child.GetComponent<PlayerSettings>().GetPlayer();
+            if (player == null)
+            {
+                continue;
+            }
+            playerCount++;
+        }
+        if (playerCount < 2) return;
         Player.NextActivePlayer();
         GamePlayManager.FieldSize = new Vector2Int(6, 6);
         SceneManager.LoadScene("Game Scene");
