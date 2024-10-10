@@ -13,14 +13,17 @@ public class FieldObserver : MonoBehaviour
     }
     public void Undo()
     {
+        if (GamePlayManager.IsEnded) return;
         if (commandManager.Undo()) Player.PreviousActivePlayer();
     }
     public void Redo()
     {
+        if (GamePlayManager.IsEnded) return;
         if (commandManager.Redo()) Player.NextActivePlayer();
     }
     private void OnClick(GameplayButton button)
     {
+        if (GamePlayManager.IsEnded) return;
         var state = Player.ActivePlayer.GetFieldState();
         commandManager.AddCommand(new GameCommand(button, state));
         Player.NextActivePlayer();

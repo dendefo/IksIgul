@@ -9,6 +9,8 @@ public class GamePlayManager : MonoBehaviour
     public List<List<GameplayButton>> GameGrid;
     [SerializeField] private GameplayButton FieldPrefab;
     [SerializeField] private RectTransform FieldParent;
+    [SerializeField] private TMPro.TMP_Text TitleText;
+    public static bool IsEnded;
     const int MULTIPLIER = 128;
     private void Awake()
     {
@@ -27,14 +29,52 @@ public class GamePlayManager : MonoBehaviour
     private void OnEnable()
     {
         GameCommand.OnCommandExecuted += OnCommandExecuted;
+        Player.PlayerChanged += Player_PlayerChanged;
+
+    }
+    private void Start()
+    {
+        Player.NextActivePlayer();
+
+    }
+
+    public void Restart()
+    {
+        foreach (var row in GameGrid)
+        {
+            foreach (var field in row)
+            {
+                field.ChangeState(new EmptyFieldState());
+            }
+        }
+        IsEnded = false;
+        Player.ResetPlayerOrder();
+    }
+    private void Player_PlayerChanged(Player player)
+    {
+        if (IsEnded) return;
+        TitleText.text = $"{player.GetPlayerName()}'s turn";
     }
 
     private void OnCommandExecuted()
     {
         if (HorizontalWinCondition() || VerticalWinCondition() || DiagonalWinCondition())
         {
-            Debug.Log("Win");
+            WinGame();
         }
+    }
+    private void WinGame()
+    {
+        foreach (var row in GameGrid)
+        {
+            foreach (var field in row)
+            {
+                field.ChangeState(new FilledState(field.GetState().GetVisual()));
+            }
+        }
+        TitleText.text = $"{Player.ActivePlayer.GetPlayerName()} wins!";
+        IsEnded = true;
+
     }
     private bool HorizontalWinCondition()
     {
@@ -134,6 +174,7 @@ public class GamePlayManager : MonoBehaviour
     private void OnDisable()
     {
         GameCommand.OnCommandExecuted -= OnCommandExecuted;
+        Player.PlayerChanged -= Player_PlayerChanged;
     }
     private void OnDestroy()
     {

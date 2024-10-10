@@ -7,6 +7,8 @@ public class MainMenuManager : MonoBehaviour
 {
     [SerializeField] RectTransform PlayerContent;
     [SerializeField] PlayerSettings PlayerSettingsPrefab;
+    [SerializeField] TMPro.TMP_InputField Width;
+    [SerializeField] TMPro.TMP_InputField Height;
 
     public void AddPlayer()
     {
@@ -38,8 +40,9 @@ public class MainMenuManager : MonoBehaviour
             playerCount++;
         }
         if (playerCount < 2) return;
-        Player.NextActivePlayer();
-        GamePlayManager.FieldSize = new Vector2Int(6, 6);
+        int width = Width.text == "" ? 3 : int.Parse(Width.text);
+        int height = Height.text == "" ? 3 : int.Parse(Height.text);
+        GamePlayManager.FieldSize = new Vector2Int(width, height);
         SceneManager.LoadScene("Game Scene");
     }
 }

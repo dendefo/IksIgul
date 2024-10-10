@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,6 +6,7 @@ using UnityEngine;
 
 public class Player
 {
+    public static event Action<Player> PlayerChanged;
     public static Player ActivePlayer { get; private set; }
     private static List<Player> _players = new List<Player>();
     [SerializeField] string playerName;
@@ -16,13 +18,13 @@ public class Player
     {
         //Error Handling
         if (_players.Select(x => x.GetFieldState().GetVisual()).Any(x => x.Equals(Symbol)))
-            throw new System.Exception("Symbol already taken");
+            throw new Exception("Symbol already taken");
         if (name == "")
-            throw new System.Exception("Name can't be empty");
+            throw new Exception("Name can't be empty");
         if (Symbol == "")
-            throw new System.Exception("Symbol can't be empty");
+            throw new Exception("Symbol can't be empty");
         if (_players.Any(_players => _players.GetPlayerName().Equals(name)))
-            throw new System.Exception("Name already taken");
+            throw new Exception("Name already taken");
 
         playerName = name;
         FieldState = new FilledState(Symbol);
@@ -32,7 +34,11 @@ public class Player
     {
         _players.Remove(this);
     }
-
+    public static void ResetPlayerOrder()
+    {
+        ActivePlayer = _players[0];
+        PlayerChanged?.Invoke(ActivePlayer);
+    }
     public static void NextActivePlayer()
     {
         if (ActivePlayer == null)
@@ -45,6 +51,7 @@ public class Player
             int nextIndex = (currentIndex + 1) % _players.Count;
             ActivePlayer = _players[nextIndex];
         }
+        PlayerChanged?.Invoke(ActivePlayer);
     }
     public static void PreviousActivePlayer()
     {
@@ -64,6 +71,7 @@ public class Player
             ActivePlayer = _players[nextIndex];
         
         }
+        PlayerChanged?.Invoke(ActivePlayer);
     }
     public static void ClearPlayers()
     {
